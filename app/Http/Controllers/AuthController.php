@@ -1,5 +1,8 @@
 <?php
+
 namespace App\Http\Controllers;
+
+use App\Models\Profile;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -9,32 +12,8 @@ class AuthController extends Controller
 {
     public function index()
     {
-        $company_id = auth()->user()->company_id;
-        $users = DB::table('users')
-            ->join('roles','roles.id','=','users.role_id')
-            ->selectRaw('users.*, roles.role_name')
-            ->where('users.company_id','=',$company_id)
-            ->get();
-        return response()->json([
-            'success'=>true,
-            'data'=>$users,
-            'company_id'=>$company_id,
-        ],200);
     }
 
-    public function relatedItems(){
-        $roles = DB::table('roles')
-            ->selectRaw('roles.id as value,roles.role_name as label')
-            ->where('roles.company_id','=',auth()->user()->company_id)
-            ->get();
-
-        return response()->json([
-            'success'=>true,
-            'data'=>[
-                'roles'=>$roles
-            ]
-        ],200);
-    }
     /**
      * Registration
      */
@@ -42,16 +21,18 @@ class AuthController extends Controller
     {
 
         $user = User::create([
-            'name' => $request->name,
             'email' => $request->email,
             'role_id' => $request->role_id,
             'password' => bcrypt($request->password),
-            'company_id'=>$request->company_id
         ]);
-
+        $profile =[
+            'full_name' => $request->full_name ?? 'unknown',
+            'user_id' => $user->id
+        ];
+        Profile::create($profile);
         $token = $user->createToken('LaravelAuthApp')->accessToken;
 
-        return response()->json(['token' => $token,'success'=>true], 200);
+        return response()->json(['token' => $token,'profile' => $profile, 'success' => true], 200);
     }
 
     /**
@@ -64,24 +45,17 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => $request->password
         ];
+        // return response()->json($data);
 
+//        $role = auth()->user()->hasOne(Role::class);
         if (auth()->attempt($data)) {
+            $user = auth()->user();
+            $user->role = User::find($user->id)->role->name;
             $token = auth()->user()->createToken('LaravelAuthApp')->accessToken;
 
-            $user = auth()
-                    ->user()
-                    ->join('roles', 'roles.id', '=', 'users.role_id')
-                    ->join('companies','companies.id','=','users.company_id')
-                    ->where([
-                        ['users.id','=',auth()->user()->id],
-                        ['users.company_id','=',auth()->user()->company_id]
-                    ])
-                    ->select('users.*', 'roles.role_name','roles.permissions', 'companies.company_name')
-                    ->first();
-
-            return response()->json(['success'=>true,'token' => $token,'data'=>$user], 200);
+            return response()->json(['success' => true, 'token' => $token,'user'=>$user], 200);
         } else {
-            return response()->json(['success'=>false,'error' => 'Email or password incorrect try again!'] );
+            return response()->json(['success' => false, 'error' => 'Email or password incorrect try again!']);
         }
     }
     /**
@@ -92,19 +66,6 @@ class AuthController extends Controller
      */
     public function show($id)
     {
-        $user = User::find($id);
-        if($user){
-            return response()->json([
-                'success'=>true,
-                'data'=>$user
-            ],200);
-        }
-        else{
-            return response()->json([
-                'success'=>false,
-                'data'=>'User not found'
-            ],404);
-        }
     }
 
     /**
@@ -116,32 +77,5 @@ class AuthController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $user = User::find($id);
-        if(!$user){
-            return response()->json([
-                'success'=>false,
-                'data'=>'Cannot find user with this id!'
-            ],404);
-        }
-        $data = [
-            'name'=>$request->name,
-            'email' => $request->email,
-            'role_id' => $request->role_id
-        ];
-        $updated=$user->update($data);
-        if($updated){
-            return response()->json([
-                'success'=>true,
-                'data'=>$updated
-            ],200);
-        }
-        else{
-            return response()->json([
-                'success'=>false,
-                'data'=>'Cannot update this user try again!!'
-            ],400);
-        }
-
     }
-
 }

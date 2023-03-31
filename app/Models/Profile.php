@@ -4,13 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class
-
-Role extends Model
+class Profile extends Model
 {
     use HasFactory;
+
     protected $fillable=[
-        'name'
+        'full_name',
+        'profile_url',
+        'user_id'
     ];
+
+
+
+
 }

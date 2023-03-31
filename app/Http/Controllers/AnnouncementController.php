@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Role;
+use App\Models\Announcement;
+use App\Models\BasePost;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class RoleController extends Controller
+class AnnouncementController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -15,7 +16,7 @@ class RoleController extends Controller
      */
     public function index()
     {
-        
+        //
     }
 
     /**
@@ -25,7 +26,7 @@ class RoleController extends Controller
      */
     public function create()
     {
-
+        //
     }
 
     /**
@@ -34,28 +35,41 @@ class RoleController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
+        $data = $request->all();
+        $data['user_id'] = auth()->user()->id;
+
+        $basePost = BasePost::create($data);
+        $announcement = Announcement::create([
+            'base_post_id' => $basePost->id
+        ]);
+        $announcement->load('basePost','basePost.user','basePost.user.profile');
+        return response()->json(
+            [
+                $announcement
+            ]
+        );
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Role  $role
+     * @param  \App\Models\Announcement  $announcement
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Announcement $announcement)
     {
-      
+        //
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Role  $role
+     * @param  \App\Models\Announcement  $announcement
      * @return \Illuminate\Http\Response
      */
-    public function edit(Role $role)
+    public function edit(Announcement $announcement)
     {
         //
     }
@@ -64,22 +78,22 @@ class RoleController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Role  $role
+     * @param  \App\Models\Announcement  $announcement
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Announcement $announcement)
     {
-       
+        //
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Role  $role
+     * @param  \App\Models\Announcement  $announcement
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Announcement $announcement)
     {
-       
+        //
     }
 }

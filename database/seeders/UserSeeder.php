@@ -15,14 +15,10 @@ class UserSeeder extends Seeder
     public function run()
     {
         $user = User::create([
-            'name' => 'admin',
-            'email' => 'admin@gmail.com',
-            'role_id' => 1,
-            'company_id'=>1,
-            'password' => bcrypt('1234')
+            'email' => 'upm@upm.com',
+            'password' => bcrypt(1234),
+            'role_id' => 1
         ]);
-
-        $token = $user->createToken('LaravelAuthApp')->accessToken;
-
+        $user->createToken('LaravelAuthApp')->accessToken;
     }
 }
