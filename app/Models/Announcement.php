@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\BasePostTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Announcement extends Model
 {
-    use HasFactory;
+    use HasFactory, BasePostTrait;
 
     public $timestamps = false;
 
@@ -16,12 +17,6 @@ class Announcement extends Model
         'base_post_id'
     ];
     protected $appends = ['type'];
-    public function basePost():BelongsTo{
-        return $this->belongsTo(BasePost::class);
-    }
-    public function getTypeAttribute() : string
-    {
-        return 'announcement';
-    }
+
 
 }

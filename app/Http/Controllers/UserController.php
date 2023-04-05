@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Profile;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\ExcelImport;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -31,8 +32,41 @@ class UserController extends Controller
 
     }
 
+    public function createFromExcel(Request $request)
+    {
+        $path = User::uploadUsers($request);
+        $rows = (new ExcelImport())->importAndSave(public_path($path));
+        $savedUsers = 0 ;
+
+        $unrivaledLength =0;
+        foreach ($rows as $row) {
+            $email = $row[0];
+            $password = $row[1];
+            $role = $row[2];
+            if($email && $row[1] && filter_var($email , FILTER_VALIDATE_EMAIL)){
+                $role_id = $role == "teacher" ? 2 : 1;
+                $user = [
+                    'email' => $email,
+                    'password' => bcrypt($password),
+                    'role_id' => $role_id,
+                    'univ_id' => auth()->user()->id
+                ];
+                $stored = User::create($user);
+                if($stored){
+                    $savedUsers++;
+                }
+           } else{
+                $unrivaledLength++;
+            }
+        }
+        return response()->json([
+            'saved' => $savedUsers,
+            'unrivaled' => $unrivaledLength
+        ]);
+    }
     public function createUsers(Request $request)
     {
+
         $i = 0;
         foreach ($request->all() as $user) {
 
@@ -43,10 +77,6 @@ class UserController extends Controller
                 'password' => bcrypt($user['password']),
                 'univ_id' => auth()->user()->id
             ]);
-            $profile =[
-                'user_id' => $user->id
-            ];
-            Profile::create($profile);
             $i++;
         }
         return response()->json([

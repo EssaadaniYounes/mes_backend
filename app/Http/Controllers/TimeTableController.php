@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\TimeTable;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class TimeTableController extends Controller
@@ -14,7 +15,11 @@ class TimeTableController extends Controller
      */
     public function index()
     {
-        //
+        $timeTables = TimeTable::whereHas('classe',function($q){
+                $q->where('univ_id', auth()->user()->id);
+            })->with('classe:name,id')
+            ->get();
+            return response()->json($timeTables);
     }
 
     /**
@@ -33,9 +38,18 @@ class TimeTableController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        //
+        $timeTable = TimeTable::create($request->all());
+        return response()->json($timeTable);
+    }
+
+    public function uploadFile(Request $request): JsonResponse
+    {
+        $filePath = TimeTable::uploadTimeTable($request);
+        return response()->json([
+            'url' => $filePath
+        ]);
     }
 
     /**

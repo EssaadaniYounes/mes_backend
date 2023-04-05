@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTimeTablesTable extends Migration
+class CreateClassesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,11 @@ class CreateTimeTablesTable extends Migration
      */
     public function up()
     {
-        Schema::create('time_tables', function (Blueprint $table) {
+        Schema::create('classes', function (Blueprint $table) {
             $table->id();
-            $table->string('file')->nullable();
-            $table->unsignedBigInteger('classe_id');
-            $table->foreign('classe_id')->references('id')->on('classes')->onDelete('cascade');
+            $table->string('name')->nullable();
+            $table->unsignedBigInteger('univ_id');
+            $table->foreign('univ_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -29,6 +29,6 @@ class CreateTimeTablesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('time_tables');
+        Schema::dropIfExists('classes');
     }
 }

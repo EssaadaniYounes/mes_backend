@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\BasePostTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Post extends Model
 {
-    use HasFactory;
+    use HasFactory, BasePostTrait;
 
     protected $fillable =[
         'post_id',
@@ -17,11 +18,5 @@ class Post extends Model
     ];
 
     protected $appends = ['type'];
-    public function basePost():BelongsTo{
-        return $this->belongsTo(BasePost::class);
-    }
-    public function getTypeAttribute() : string
-    {
-        return 'post';
-    }
+
 }

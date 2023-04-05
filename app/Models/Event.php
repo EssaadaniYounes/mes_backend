@@ -11,13 +11,13 @@ class Event extends Model
     use HasFactory;
 
     protected $fillable = [
-        'post_id',
+        'base_post_id',
         'files',
         'event_date',
         'event_type'
     ];
     protected $appends = ['type'];
-    public function basePost():BelongsTo{
+    public function basePost(): BelongsTo{
         return $this->belongsTo(BasePost::class);
     }
     public function getTypeAttribute() : string
