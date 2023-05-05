@@ -2,44 +2,44 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Result;
 use App\Models\TimeTable;
 use App\Services\CRUDHelper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
-class TimeTableController extends Controller
+class ResultController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return JsonResponse
+     * @return \Illuminate\Http\Response
      */
-    public function index(): JsonResponse
+    public function index()
     {
-        $timeTables = TimeTable::whereHas('classe',function($q){
-                $q->where('univ_id', auth()->user()->id);
-            })->with('classe:name,id')
+        $results = Result::whereHas('classe',function($q){
+            $q->where('univ_id', auth()->user()->id);
+        })->with('classe:name,id')
             ->get();
-        return response()->json($timeTables);
+        return response()->json($results);
     }
 
     public function getCurrentUserResult()
     {
-        $data = TimeTable::whereHas('classe',function($q){
+        $result = Result::whereHas('classe',function($q){
             $q->where('id',auth()->user()->classe->id);
         })
             ->with(['classe:id,name'])
             ->orderByDesc('created_at')
             ->first();
 
-        return response()->json($data);
+        return response()->json($result);
     }
 
     /**
      * Show the form for creating a new resource.
      *
-     * @return Response
+     * @return \Illuminate\Http\Response
      */
     public function create()
     {
@@ -49,30 +49,29 @@ class TimeTableController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param Request $request
-     * @return Response
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
      */
     public function store(Request $request): JsonResponse
     {
-        $timeTable = TimeTable::create($request->all());
-        return response()->json($timeTable);
+        $result = Result::create($request->all());
+        return response()->json($result);
     }
 
     public function uploadFile(Request $request): JsonResponse
     {
-        $filePath = TimeTable::uploadTimeTable($request);
+        $filePath = Result::uploadTimeTable($request);
         return response()->json([
             'url' => $filePath
         ]);
     }
-
     /**
      * Display the specified resource.
      *
-     * @param TimeTable $timeTable
-     * @return Response
+     * @param  \App\Models\Result  $result
+     * @return \Illuminate\Http\Response
      */
-    public function show(TimeTable $timeTable)
+    public function show(Result $result)
     {
         //
     }
@@ -80,10 +79,10 @@ class TimeTableController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param TimeTable $timeTable
-     * @return Response
+     * @param  \App\Models\Result  $result
+     * @return \Illuminate\Http\Response
      */
-    public function edit(TimeTable $timeTable)
+    public function edit(Result $result)
     {
         //
     }
@@ -91,11 +90,11 @@ class TimeTableController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param Request $request
-     * @param TimeTable $timeTable
-     * @return Response
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Result  $result
+     * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, TimeTable $timeTable)
+    public function update(Request $request, Result $result)
     {
         //
     }
@@ -103,25 +102,25 @@ class TimeTableController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param TimeTable $timeTable
-     * @return Response
+     * @param  \App\Models\Result  $result
+     * @return JsonResponse
      */
-    public function destroy($id)
+    public function destroy($id): JsonResponse
     {
 
-        $res = CRUDHelper::delete(TimeTable::class, $id);
+        $res = CRUDHelper::delete(Result::class, $id);
 
         if($res){
             return response()->json(
                 [
                     'success' => true,
-                    'message' => 'Time table deleted successfully!'
+                    'message' => 'Result deleted successfully!'
                 ]
             );
         }else{
             return response()->json([
                 'success' => false,
-                'message' => 'Cannot delete this time table!!'
+                'message' => 'Cannot delete this result!!'
             ]);
         }
     }

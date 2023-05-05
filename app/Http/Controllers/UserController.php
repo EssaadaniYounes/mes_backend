@@ -2,9 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Announcement;
+use App\Models\BasePost;
+use App\Models\Classe;
+use App\Models\Event;
+use App\Models\Post;
 use App\Models\Profile;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\CRUDHelper;
 use App\Services\ExcelImport;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,7 +21,7 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
     public function index()
     {
@@ -32,24 +38,51 @@ class UserController extends Controller
 
     }
 
+    public function getProfile()
+    {
+        $user = User::getProfileById(auth()->user()->id);
+        return response()->json(['user' => $user,
+            'auth' => auth()->user()->profile]);
+    }
+
+
+    public function getSuggestions(): JsonResponse
+    {
+        $users = User::with(['profile:user_id,full_name,profile_url','role:id,name'])
+            ->where([
+                ['id','!=',auth()->user()->id],
+                ['univ_id',auth()->user()->univ_id]
+            ])
+            ->get();
+
+        return response()->json($users);
+    }
+
     public function createFromExcel(Request $request)
     {
-        $path = User::uploadUsers($request);
-        $rows = (new ExcelImport())->importAndSave(public_path($path));
+        $path =  User::uploadUsers($request);
+
+        $rows = (new ExcelImport())->importAndSave($path);
         $savedUsers = 0 ;
 
         $unrivaledLength =0;
         foreach ($rows as $row) {
-            $email = $row[0];
-            $password = $row[1];
-            $role = $row[2];
+            $email = $row[1];
+            $password = $row[2];
+            $role = $row[3];
+            $class_id = null;
+            if(isset($row[4])){
+                $class_id = Classe::where('name',$row[4])->first()->id;
+            }
             if($email && $row[1] && filter_var($email , FILTER_VALIDATE_EMAIL)){
                 $role_id = $role == "teacher" ? 2 : 1;
+                User::$full_name = $row[0];
                 $user = [
                     'email' => $email,
                     'password' => bcrypt($password),
                     'role_id' => $role_id,
-                    'univ_id' => auth()->user()->id
+                    'univ_id' => auth()->user()->id,
+                    'classe_id' => $class_id
                 ];
                 $stored = User::create($user);
                 if($stored){
@@ -60,7 +93,7 @@ class UserController extends Controller
             }
         }
         return response()->json([
-            'saved' => $savedUsers,
+            'message' => "{$savedUsers} users saved",
             'unrivaled' => $unrivaledLength
         ]);
     }
@@ -71,13 +104,20 @@ class UserController extends Controller
         foreach ($request->all() as $user) {
 
             $role = $user['role'] == "student" ? 1 : 2;
+            $class_id = null;
+            if(isset($user['class'])){
+                $class_id = Classe::where('name',$user['class'])->first()->id;
+            }
+            User::$full_name = $user['full_name'];
             $user = User::create([
                 'email' => $user['email'],
                 'role_id' => $role,
                 'password' => bcrypt($user['password']),
-                'univ_id' => auth()->user()->id
+                'univ_id' => auth()->user()->id,
+                'classe_id' => $class_id
             ]);
             $i++;
+
         }
         return response()->json([
             "message" => "{$i} users saved"
@@ -111,7 +151,10 @@ class UserController extends Controller
      */
     public function show($id)
     {
-
+        $user = User::getProfileById($id);
+        return response()->json([
+            'user' => $user,
+            'auth' => auth()->user()->profile]);
     }
 
     /**
@@ -141,10 +184,24 @@ class UserController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\Role  $role
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
-    public function destroy($id)
+    public function destroy($id): JsonResponse
     {
+        $res = CRUDHelper::delete(User::class, $id);
 
+        if($res){
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'User deleted successfully!'
+                ]
+            );
+        }else{
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete this user!!'
+            ]);
+        }
     }
 }

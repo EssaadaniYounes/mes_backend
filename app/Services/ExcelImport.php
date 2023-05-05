@@ -14,6 +14,7 @@ class ExcelImport
     public function importAndSave($filePath)
     {
             $worksheet = (new Xlsx())->load($filePath)->getActiveSheet();
+
             $rows=[];
             $counter = 0;
             foreach ( $worksheet->getRowIterator() as $row) {

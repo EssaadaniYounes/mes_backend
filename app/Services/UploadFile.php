@@ -18,7 +18,17 @@ class UploadFile
     {
         if($request->hasFile($this->fileHeader)){
             $file = $request->file($this->fileHeader);
-            return asset('storage/'.$file->store($this->path));
+            return  'storage/'.$file->store($this->path);
         }
+    }
+    public function uploadMany($files)
+    {
+        $storedFiles = [];
+
+        foreach ($files as $file) {
+            $storedFile = 'storage/'.$file->store($this->path);
+            array_push($storedFiles, $storedFile);
+        }
+        return $storedFiles;
     }
 }

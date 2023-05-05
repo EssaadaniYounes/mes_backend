@@ -15,6 +15,8 @@ class CreateEventsTable extends Migration
     {
         Schema::create('events', function (Blueprint $table) {
             $table->foreignId('base_post_id')->constrained()->references('id')->on('base_posts')->onDelete('cascade');
+            $table->string('thumbnail')->nullable();
+            $table->string('title')->nullable();
             $table->json('files')->nullable();
             $table->string('event_date')->nullable();
             $table->string('event_type')->default('school');

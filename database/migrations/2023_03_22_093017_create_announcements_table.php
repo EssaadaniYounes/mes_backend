@@ -15,6 +15,7 @@ class CreateAnnouncementsTable extends Migration
     {
         Schema::create('announcements', function (Blueprint $table) {
             $table->foreignId('base_post_id')->constrained()->references('id')->on('base_posts')->onDelete('cascade');
+            $table->string('classe_id');
         });
     }
 

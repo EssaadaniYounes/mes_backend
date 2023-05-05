@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Classe;
+use App\Services\CRUDHelper;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,7 +18,9 @@ class ClasseController extends Controller
     public function index(): JsonResponse
     {
         $classes = Classe::select('id','name')
+                    ->withCount('users')
                     ->where('univ_id', auth()->user()->id)
+                    ->orderByDesc('created_at')
                     ->get();
         return  response()->json($classes,200);
     }
@@ -40,8 +43,13 @@ class ClasseController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+
         try {
-            $class = Classe::create($request->all());
+            $class = [
+                'name' => $request->all()['name'],
+                'univ_id' => auth()->user()->id
+            ];
+            $class = Classe::create($class);
             if(!$class){
                 response()->json([
                     'message'=>'Cannot create this class',
@@ -49,7 +57,7 @@ class ClasseController extends Controller
                     'data'=>null],400);
             }
             return response()->json([
-                'message' => 'created Successfully',
+                'message' => 'Created Successfully',
                 'success' => true,
                 'data' => $class
             ],200);
@@ -99,10 +107,25 @@ class ClasseController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\Classe  $classe
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
-    public function destroy(Classe $classe)
+    public function destroy($id): JsonResponse
     {
-        //
+
+        $res = CRUDHelper::delete(Classe::class, $id);
+
+        if($res){
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'Class deleted successfully!'
+                ]
+            );
+        }else{
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete this class!!'
+            ]);
+        }
     }
 }

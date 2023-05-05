@@ -41,13 +41,12 @@ class AuthController extends Controller
     public function login(Request $request)
     {
 
+
+
         $data = [
             'email' => $request->email,
             'password' => $request->password
         ];
-        // return response()->json($data);
-
-//        $role = auth()->user()->hasOne(Role::class);
         if (auth()->attempt($data)) {
             $user = auth()->user();
             $user->role = User::find($user->id)->role->name;

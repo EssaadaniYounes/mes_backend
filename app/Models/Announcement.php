@@ -14,7 +14,8 @@ class Announcement extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'base_post_id'
+        'base_post_id',
+        'classe_id'
     ];
     protected $appends = ['type'];
 

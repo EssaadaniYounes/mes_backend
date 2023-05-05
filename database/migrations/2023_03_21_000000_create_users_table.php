@@ -20,7 +20,7 @@ class CreateUsersTable extends Migration
             $table->string('password');
             $table->foreignId('role_id')->default('1')->constrained()->on('roles');
             $table->foreignId('univ_id')->nullable()->constrained()->on('users')->onDelete('cascade');
-            $table->foreignId('classe_id')->nullable()->constrained()->on('classes')->onDelete('cascade');
+            $table->string('classe_id')->nullable();
 //            $table->foreign('univ_id')->->references('id')->on('users')->onDelete('cascade');
             $table->rememberToken();
             $table->timestamps();

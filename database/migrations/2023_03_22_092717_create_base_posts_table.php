@@ -17,7 +17,7 @@ class CreateBasePostsTable extends Migration
             $table->id();
             $table->text('content')->nullable();
             $table->foreignId('user_id')->constrained()->references('id')->on('users')->onDelete('cascade');
-            $table->timestamps();
+            $table->timestamp();
         });
     }
 

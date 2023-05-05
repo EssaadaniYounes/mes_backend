@@ -17,7 +17,6 @@ class CreateTimeTablesTable extends Migration
             $table->id();
             $table->string('file')->nullable();
             $table->unsignedBigInteger('classe_id');
-            $table->foreign('classe_id')->references('id')->on('classes')->onDelete('cascade');
             $table->timestamps();
         });
     }

@@ -14,12 +14,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/', function (\Illuminate\Http\Request $request) {
+    return $request->test??'null';
 });
 
 Route::get('/test',function (){
-    dd(TimeTable::whereHas('classe', function($q){
-        $q->where('univ_id', 5);
-    })->with('classe:name,id')->get()->toArray());
+    $test = str_replace("\\","","\http://mes-backend.test/storage/xlsxs/us\\ers/EmfOvzCviXuPVR05QzZC\\PrSTD89CDjl8DvexOODI.xlsx\\");
+    dd($test);
 });

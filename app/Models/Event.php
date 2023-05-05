@@ -2,26 +2,40 @@
 
 namespace App\Models;
 
+use App\Services\UploadFile;
+use App\Traits\BasePostTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Http\Request;
 
 class Event extends Model
 {
-    use HasFactory;
+    use HasFactory,BasePostTrait;
 
     protected $fillable = [
         'base_post_id',
+        'title',
+        'thumbnail',
         'files',
         'event_date',
         'event_type'
     ];
+    public static $filesPath = 'events';
+    public $timestamps = false;
+
     protected $appends = ['type'];
-    public function basePost(): BelongsTo{
-        return $this->belongsTo(BasePost::class);
-    }
-    public function getTypeAttribute() : string
+
+    public static function uploadSingle(Request $request):string
     {
-        return 'event';
+        return (
+        new UploadFile(Event::$filesPath,'file')
+        )->uploadSingle($request);
+
     }
+
+    public static function upload($files)
+    {
+        return (new UploadFile(Event::$filesPath,''))->uploadMany($files);
+    }
+
 }

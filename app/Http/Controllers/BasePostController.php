@@ -26,11 +26,9 @@ class BasePostController extends Controller
         $posts = Post::with($relations)
                         ->get()
                         ->toArray();
-        $events = Event::with($relations)
-                        ->get()
-                        ->toArray();
 
-        $merged = array_merge($announcement, $posts,$events);
+
+        $merged = array_merge($announcement, $posts);
         usort($merged,function($a, $b) {
                 return strcmp( $b['base_post']['created_at'],$a['base_post']['created_at']);
         });
