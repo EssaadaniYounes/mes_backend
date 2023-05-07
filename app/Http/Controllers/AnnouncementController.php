@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Announcement;
 use App\Models\BasePost;
+use App\Models\ClasseAnnouncement;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AnnouncementController extends Controller
 {
@@ -16,7 +18,20 @@ class AnnouncementController extends Controller
      */
     public function index()
     {
-        //
+        $currentUserId = auth()->user();
+        $announcements = Announcement::with(['classeAnnouncements', 'basePost.user'])
+            ->whereHas('classeAnnouncements', function ($query) use ($currentUserId) {
+                $query->where('classe_id', $currentUserId->classe_id);
+            })
+            ->orWhereHas('basePost', function ($query) use ($currentUserId) {
+                $query->where('user_id', $currentUserId->id);
+            })
+            ->get();
+
+        return response()->json([
+            'announcements' => $announcements
+        ]);
+
     }
 
     /**
@@ -44,6 +59,12 @@ class AnnouncementController extends Controller
         $announcement = Announcement::create([
             'base_post_id' => $basePost->id
         ]);
+        foreach ($data['classes'] as $class) {
+            ClasseAnnouncement::create([
+                'announcement_id' => $basePost->id,
+                'classe_id' => $class
+            ]);
+        }
         $announcement->load('basePost','basePost.user','basePost.user.profile');
         return response()->json(
             [

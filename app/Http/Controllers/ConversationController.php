@@ -23,6 +23,18 @@ class ConversationController extends Controller
         ]);
     }
 
+    public function getSuggestions()
+    {
+        $users = User::with(['profile:user_id,full_name,profile_url','role:id,name'])
+            ->where([
+                ['id','!=',auth()->user()->id],
+                ['univ_id',auth()->user()->univ_id]
+            ])
+            ->get();
+
+        return response()->json($users);
+    }
+
     public function getMessages($id){
         $conversation = Conversation::find($id);
         $otherUserId = ($conversation->started_by === auth()->id())

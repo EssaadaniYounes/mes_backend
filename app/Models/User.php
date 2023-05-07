@@ -76,6 +76,18 @@ class User extends Authenticatable
     }
     public static function getProfileById($id){
         $relations = ['basePost','basePost.user:id,email','basePost.user.profile:user_id,full_name,profile_url'];
+
+
+
+        $followersCount = Follower::where('following_id', $id)->count();
+
+        $followingsCount = Follower::where('follower_id', $id)->count();
+
+        $followers =[
+            'followers_count' => $followersCount,
+            'followings_count' => $followingsCount,
+        ];
+
         $announcements = Announcement::whereHas('basePost',function ($q) use ($id) {
             $q->where('user_id',$id);
         })->with($relations)
@@ -99,6 +111,7 @@ class User extends Authenticatable
             ->where('id',$id)
             ->first();
         $user->posts = $merged;
+        $user->followers = $followers;
         return $user;
     }
     public static function uploadUsers(Request $request): string

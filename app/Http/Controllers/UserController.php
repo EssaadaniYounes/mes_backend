@@ -48,12 +48,20 @@ class UserController extends Controller
 
     public function getSuggestions(): JsonResponse
     {
-        $users = User::with(['profile:user_id,full_name,profile_url','role:id,name'])
-            ->where([
-                ['id','!=',auth()->user()->id],
-                ['univ_id',auth()->user()->univ_id]
-            ])
+        $currentUserId = auth()->user()->id;
+
+        $currentUser = User::find($currentUserId);
+
+        $users = User::with('profile','role')
+        ->where('univ_id', $currentUser->univ_id)
+            ->whereNotIn('id', function ($query) use ($currentUserId) {
+                $query->select('following_id')
+                    ->from('followers')
+                    ->where('follower_id', '=', $currentUserId);
+            })
+            ->where('id','!=' ,$currentUser->id)
             ->get();
+
 
         return response()->json($users);
     }

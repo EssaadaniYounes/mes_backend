@@ -24,6 +24,15 @@ class ClasseController extends Controller
                     ->get();
         return  response()->json($classes,200);
     }
+    public function universityClasses(): JsonResponse
+    {
+        $classes = Classe::select('id','name')
+                    ->withCount('users')
+                    ->where('univ_id', auth()->user()->univ_id)
+                    ->orderByDesc('created_at')
+                    ->get();
+        return  response()->json($classes,200);
+    }
 
     /**
      * Show the form for creating a new resource.

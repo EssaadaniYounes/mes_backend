@@ -14,10 +14,14 @@ class Announcement extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'base_post_id',
-        'classe_id'
-    ];
+        'base_post_id'];
     protected $appends = ['type'];
+
+
+    public function classeAnnouncements()
+    {
+        return $this->hasMany(ClasseAnnouncement::class);
+    }
 
 
 }

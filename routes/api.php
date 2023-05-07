@@ -6,6 +6,7 @@ use App\Http\Controllers\BasePostController;
 use App\Http\Controllers\ClasseController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\FollowerController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ResultController;
@@ -42,18 +43,21 @@ Route::middleware('auth:api')->group(function () {
 
 
     Route::get('auth-user',[UserController::class,'getAuthenticatedUser']);
+    Route::get('university-classes',[ClasseController::class,'universityClasses']);
     Route::get('profile',[UserController::class,'getProfile']);
     Route::get('users-suggestions',[UserController::class,'getSuggestions']);
     Route::get('results/result/current',[ResultController::class,'getCurrentUserResult']);
     Route::get('time-table/current',[TimeTableController::class,'getCurrentUserResult']);
     Route::get('events/event/{type}',[EventController::class,'getByType']);
     Route::get('conversation-messages/{id}',[ConversationController::class,'getMessages']);
+    Route::get('conversations-suggestions',[ConversationController::class,'getSuggestions']);
 
 
     Route::post('create-users',[UserController::class,'createUsers']);
     Route::post('create-users-excel',[UserController::class,'createFromExcel']);
-     Route::post('mark-messages-read/{id}',[ConversationController::class,'markRead']);
-
+    Route::post('mark-messages-read/{id}',[ConversationController::class,'markRead']);
+    Route::post('followers/follow',[FollowerController::class,'follow']);
+    Route::post('followers/unfollow',[FollowerController::class,'unfollow']);
 
     //uploads
      Route::post('time-tables/upload',[TimeTableController::class,'uploadFile']);
